@@ -181,8 +181,29 @@ function createMarkdownComponents(
           </Link>
         );
       }
+
+      const isAmazonAffiliate = Boolean(href && /amazon\./i.test(href));
+      const trackAffiliateClick = () => {
+        if (!isAmazonAffiliate || !asin || !postSlug) return;
+        const endpoint = import.meta.env.VITE_CONVEX_SITE_URL || "/api/track-click";
+        const url = endpoint.startsWith("http") ? `${endpoint.replace(/\/$/, "")}/api/track-click` : endpoint;
+        fetch(url, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ asin, postSlug, referrer: document.referrer }),
+          keepalive: true,
+          mode: url.startsWith("http") ? "cors" : "same-origin",
+        }).catch(() => undefined);
+      };
+
       return (
-        <a href={href} target="_blank" rel={href?.includes("amazon.") ? "sponsored noopener noreferrer" : "noopener noreferrer"} {...props}>
+        <a
+          href={href}
+          target="_blank"
+          rel={isAmazonAffiliate ? "sponsored noopener noreferrer" : "noopener noreferrer"}
+          onClick={trackAffiliateClick}
+          {...props}
+        >
           {children}
         </a>
       );
