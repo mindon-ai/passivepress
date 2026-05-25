@@ -1,4 +1,4 @@
-# Local-only deploy secrets/config for NeuronPress.
+# Local-only deploy secrets/config for PassivePress.
 # Copy to .deploy.local and keep it out of git.
 
 # Optional: frontend deploy script will use this automatically for sudo.
