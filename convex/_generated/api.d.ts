@@ -10,6 +10,7 @@
 
 import type * as ads from "../ads.js";
 import type * as affiliateLinks from "../affiliateLinks.js";
+import type * as affiliateSettings from "../affiliateSettings.js";
 import type * as agentSettings from "../agentSettings.js";
 import type * as categories from "../categories.js";
 import type * as crons from "../crons.js";
@@ -31,6 +32,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   ads: typeof ads;
   affiliateLinks: typeof affiliateLinks;
+  affiliateSettings: typeof affiliateSettings;
   agentSettings: typeof agentSettings;
   categories: typeof categories;
   crons: typeof crons;

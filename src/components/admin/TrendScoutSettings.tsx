@@ -13,6 +13,8 @@ import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
 
 const trendScoutDefaults = {
+  niches: ["tech", "home-appliances", "fitness"],
+  minSearchVolume: 0,
   sources: {
     serper: true,
     hackerNews: false,
@@ -202,6 +204,24 @@ export function TrendScoutSettings() {
           <SettingSwitch label="Reddit" description="Reads top posts from configured buying/product subreddits." checked={config.sources.reddit} onCheckedChange={(reddit) => updateConfig((c) => ({ ...c, sources: { ...c.sources, reddit } }))} />
           <SettingSwitch label="arXiv" description="Optional legacy research feed; disabled by default for affiliate topics." checked={config.sources.arxiv} onCheckedChange={(arxiv) => updateConfig((c) => ({ ...c, sources: { ...c.sources, arxiv } }))} />
           <SettingSwitch label="Evergreen fallback" description="Allows fallback topics when live sources return nothing." checked={config.sources.fallback} onCheckedChange={(fallback) => updateConfig((c) => ({ ...c, sources: { ...c.sources, fallback } }))} />
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-xl">Affiliate niche filters</CardTitle>
+          <CardDescription>Controls which product niches are eligible and filters out low-volume topics.</CardDescription>
+        </CardHeader>
+        <CardContent className="grid gap-4 md:grid-cols-2">
+          <div className="space-y-2">
+            <Label>Enabled niches</Label>
+            <Textarea rows={5} value={config.niches.join("\n")} onChange={(event) => updateConfig((c) => ({ ...c, niches: linesToArray(event.target.value) }))} />
+          </div>
+          <div className="space-y-2">
+            <Label>Minimum estimated search volume</Label>
+            <Input type="number" min={0} value={config.minSearchVolume} onChange={(event) => updateConfig((c) => ({ ...c, minSearchVolume: numberValue(event.target.value, c.minSearchVolume) }))} />
+            <p className="text-xs text-muted-foreground">Set to 0 to keep all discovered topics. Estimates are heuristic until a keyword API is added.</p>
+          </div>
         </CardContent>
       </Card>
 

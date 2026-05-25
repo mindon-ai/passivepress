@@ -6,6 +6,7 @@ import { SEO } from "@/components/SEO";
 import { Layout } from "@/components/Layout";
 import { LoadingPage } from "@/components/LoadingPage";
 import { AdsSettings } from "@/components/admin/AdsSettings";
+import { AffiliateSettings } from "@/components/admin/AffiliateSettings";
 import { DataVizSettings } from "@/components/admin/DataVizSettings";
 import { ImageGenSettings } from "@/components/admin/ImageGenSettings";
 import { MetaAgentSettings } from "@/components/admin/MetaAgentSettings";
@@ -38,6 +39,7 @@ const agentTabs = [
   { id: "data-viz", name: "Data Viz" },
   { id: "writer", name: "Writer" },
   { id: "publisher", name: "Publisher" },
+  { id: "affiliate", name: "Affiliate" },
   { id: "social-media", name: "Social Media" },
   { id: "meta-agent", name: "Meta Agent" },
 ];
@@ -196,6 +198,8 @@ const Admin = () => {
                         <WriterSettings />
                       ) : agent.id === "publisher" ? (
                         <PublisherSettings />
+                      ) : agent.id === "affiliate" ? (
+                        <AffiliateSettings />
                       ) : agent.id === "social-media" ? (
                         <SocialMediaSettings />
                       ) : agent.id === "meta-agent" ? (

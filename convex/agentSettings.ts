@@ -25,6 +25,10 @@ const sourceTierValidator = v.union(
 );
 
 const trendScoutConfigValidator = v.object({
+  niches: v.optional(v.array(v.string())),
+  serperQueries: v.optional(v.array(v.string())),
+  redditSubreddits: v.optional(v.array(v.string())),
+  minSearchVolume: v.optional(v.number()),
   sources: v.object({
     serper: v.boolean(),
     hackerNews: v.boolean(),
@@ -384,6 +388,8 @@ const SOCIAL_MEDIA_AGENT_ID = "social-media";
 const META_AGENT_ID = "meta-agent";
 
 const trendScoutDefaults = {
+  niches: ["tech", "home-appliances", "fitness"],
+  minSearchVolume: 0,
   sources: {
     serper: true,
     hackerNews: false,

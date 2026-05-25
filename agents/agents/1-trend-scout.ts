@@ -13,6 +13,8 @@ const DEFAULT_NICHES = (process.env.AFFILIATE_NICHES || "tech,home-appliances,fi
 const REDDIT_BUYING_SUBREDDITS = ["BuyItForLife", "frugalmalefashion", "homeimprovement", "gadgets", "buildapcsales", "VacuumCleaners"];
 
 const DEFAULT_TREND_SCOUT_CONFIG: TrendScoutConfig = {
+  niches: DEFAULT_NICHES,
+  minSearchVolume: 0,
   sources: { serper: true, hackerNews: false, reddit: true, arxiv: false, fallback: true },
   serper: {
     queries: [
@@ -82,7 +84,7 @@ function normalizeTrendScoutConfig(config: TrendScoutConfig): TrendScoutConfig {
 }
 
 function getEnabledNiches(config: TrendScoutConfig): string[] {
-  const custom = (config as unknown as { niches?: string[] }).niches;
+  const custom = config.niches;
   return Array.isArray(custom) && custom.length ? custom : DEFAULT_NICHES;
 }
 
@@ -212,9 +214,9 @@ export async function run(): Promise<TrendTopic[]> {
   }
 
   const enabledNiches = getEnabledNiches(config);
-  const customQueries = (config as unknown as { serperQueries?: string[] }).serperQueries;
-  const redditSubreddits = (config as unknown as { redditSubreddits?: string[] }).redditSubreddits || config.reddit.subreddits;
-  const minSearchVolume = (config as unknown as { minSearchVolume?: number }).minSearchVolume ?? 0;
+  const customQueries = config.serperQueries;
+  const redditSubreddits = config.redditSubreddits || config.reddit.subreddits;
+  const minSearchVolume = config.minSearchVolume ?? 0;
 
   let existingTitles: string[] = [];
   try {

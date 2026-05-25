@@ -34,6 +34,10 @@ export interface TrendTopic {
 }
 
 export interface TrendScoutConfig {
+  niches?: string[];
+  serperQueries?: string[];
+  redditSubreddits?: string[];
+  minSearchVolume?: number;
   sources: {
     serper: boolean;
     hackerNews: boolean;
