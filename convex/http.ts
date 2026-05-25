@@ -47,17 +47,33 @@ http.route({
  */
 http.route({
   path: "/api/track-click",
+  method: "OPTIONS",
+  handler: httpAction(async () => {
+    return new Response(null, {
+      status: 204,
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Methods": "POST, OPTIONS",
+        "Access-Control-Allow-Headers": "Content-Type",
+        "Access-Control-Max-Age": "86400",
+      },
+    });
+  }),
+});
+
+http.route({
+  path: "/api/track-click",
   method: "POST",
   handler: httpAction(async (ctx, request) => {
     let body: { asin?: string; postSlug?: string; referrer?: string };
     try {
       body = await request.json();
     } catch {
-      return new Response(JSON.stringify({ error: "Invalid JSON body" }), { status: 400, headers: { "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "Invalid JSON body" }), { status: 400, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
     }
 
     if (!body.asin || !body.postSlug) {
-      return new Response(JSON.stringify({ error: "Missing asin or postSlug" }), { status: 400, headers: { "Content-Type": "application/json" } });
+      return new Response(JSON.stringify({ error: "Missing asin or postSlug" }), { status: 400, headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" } });
     }
 
     const result = await ctx.runMutation(api.affiliateLinks.trackClick, {

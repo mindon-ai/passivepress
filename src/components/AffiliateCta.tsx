@@ -17,6 +17,7 @@ export function AffiliateCta({ href, asin, postSlug, children }: AffiliateCtaPro
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ asin, postSlug, referrer: document.referrer }),
       keepalive: true,
+      mode: url.startsWith("http") ? "cors" : "same-origin",
     }).catch(() => undefined);
   };
 
