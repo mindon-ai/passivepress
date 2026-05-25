@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://passivepress.qzz.io/</loc></url>
-  <url><loc>https://passivepress.qzz.io/about</loc></url>
-  <url><loc>https://passivepress.qzz.io/privacy</loc></url>
-  <url><loc>https://passivepress.qzz.io/terms</loc></url>
-  <url><loc>https://passivepress.qzz.io/sitemap</loc></url>
+  <url><loc>http://locahost:8080/</loc></url>
+  <url><loc>http://locahost:8080/about</loc></url>
+  <url><loc>http://locahost:8080/privacy</loc></url>
+  <url><loc>http://locahost:8080/terms</loc></url>
+  <url><loc>http://locahost:8080/sitemap</loc></url>
+  <url><loc>http://locahost:8080/category/fitness</loc></url>
+  <url><loc>http://locahost:8080/category/home-appliances</loc></url>
+  <url><loc>http://locahost:8080/category/kitchen</loc></url>
+  <url><loc>http://locahost:8080/category/outdoors</loc></url>
+  <url><loc>http://locahost:8080/category/tech</loc></url>
+  <url><loc>http://locahost:8080/best-laptop-deals</loc></url>
 </urlset>
