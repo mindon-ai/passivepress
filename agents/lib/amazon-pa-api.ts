@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { fetchWithTimeout } from "./http-utils.ts";
 import { buildAmazonAffiliateUrl } from "./affiliate-utils.ts";
+import { getAmazonPublicSettings, type AmazonPublicSettings } from "./convex-client.ts";
 import type { AmazonProduct } from "../types/pipeline.ts";
 
 export interface AmazonSearchResult {
@@ -12,8 +13,25 @@ const AMAZON_HOST_BY_REGION: Record<string, string> = {
   "us-east-1": "webservices.amazon.com",
 };
 
-function getHost(): string {
-  return process.env.AMAZON_PAAPI_HOST || AMAZON_HOST_BY_REGION[process.env.AMAZON_REGION || "us-east-1"] || "webservices.amazon.com";
+function getHost(region = process.env.AMAZON_REGION || "us-east-1"): string {
+  return process.env.AMAZON_PAAPI_HOST || AMAZON_HOST_BY_REGION[region] || "webservices.amazon.com";
+}
+
+let settingsCache: AmazonPublicSettings | null = null;
+
+async function getRuntimeSettings(): Promise<AmazonPublicSettings> {
+  if (settingsCache) return settingsCache;
+  try {
+    settingsCache = await getAmazonPublicSettings();
+  } catch {
+    settingsCache = {
+      associateTag: process.env.AMAZON_ASSOCIATE_TAG || "",
+      region: process.env.AMAZON_REGION || "us-east-1",
+      marketplace: process.env.AMAZON_MARKETPLACE || "www.amazon.com",
+      cacheTtlHours: Number(process.env.PRODUCT_CACHE_TTL_HOURS || 24),
+    };
+  }
+  return settingsCache;
 }
 
 function assertConfigured(): void {
@@ -36,11 +54,12 @@ function timestamp(date = new Date()): { amzDate: string; dateStamp: string } {
 
 async function paapi<T>(target: "SearchItems" | "GetItems", body: Record<string, unknown>): Promise<T> {
   assertConfigured();
-  const region = process.env.AMAZON_REGION || "us-east-1";
-  const host = getHost();
+  const settings = await getRuntimeSettings();
+  const region = process.env.AMAZON_REGION || settings.region || "us-east-1";
+  const host = getHost(region);
   const path = "/paapi5/" + target.toLowerCase();
   const service = "ProductAdvertisingAPI";
-  const payload = JSON.stringify({ PartnerTag: process.env.AMAZON_ASSOCIATE_TAG, PartnerType: "Associates", Marketplace: "www.amazon.com", ...body });
+  const payload = JSON.stringify({ PartnerTag: process.env.AMAZON_ASSOCIATE_TAG || settings.associateTag, PartnerType: "Associates", Marketplace: settings.marketplace || "www.amazon.com", ...body });
   const { amzDate, dateStamp } = timestamp();
   const canonicalHeaders = `content-encoding:amz-1.0\nhost:${host}\nx-amz-date:${amzDate}\nx-amz-target:com.amazon.paapi5.v1.ProductAdvertisingAPIv1.${target}\n`;
   const signedHeaders = "content-encoding;host;x-amz-date;x-amz-target";

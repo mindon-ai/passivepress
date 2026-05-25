@@ -1,8 +1,9 @@
 import type { AffiliateLink, AmazonProduct } from "../types/pipeline.ts";
 
-export function buildAmazonAffiliateUrl(asin: string, associateTag = process.env.AMAZON_ASSOCIATE_TAG ?? ""): string {
+export function buildAmazonAffiliateUrl(asin: string, associateTag = process.env.AMAZON_ASSOCIATE_TAG ?? "", marketplace = process.env.AMAZON_MARKETPLACE ?? "www.amazon.com"): string {
   const cleanAsin = asin.trim().toUpperCase();
-  const url = new URL(`https://www.amazon.com/dp/${encodeURIComponent(cleanAsin)}`);
+  const host = marketplace.trim() || "www.amazon.com";
+  const url = new URL(`https://${host}/dp/${encodeURIComponent(cleanAsin)}`);
   if (associateTag.trim()) url.searchParams.set("tag", associateTag.trim());
   return url.toString();
 }

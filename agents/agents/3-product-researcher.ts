@@ -1,7 +1,7 @@
 import "dotenv/config";
 import { getItems, searchItems } from "../lib/amazon-pa-api.ts";
 import { buildAmazonAffiliateUrl } from "../lib/affiliate-utils.ts";
-import { cacheProducts, getFreshCachedProducts } from "../lib/convex-client.ts";
+import { cacheProducts, getAmazonPublicSettings, getFreshCachedProducts } from "../lib/convex-client.ts";
 import * as webResearcher from "./8-researcher.ts";
 import type { AmazonProduct, ChosenTopic, ProductResearchData } from "../types/pipeline.ts";
 
@@ -40,7 +40,8 @@ export async function run(topic: ChosenTopic): Promise<ProductResearchData> {
     const missingAsins = asins.filter((asin) => !cachedByAsin.has(asin.toUpperCase()));
     const fresh = missingAsins.length ? await getItems(missingAsins) : [];
     if (fresh.length) {
-      await cacheProducts(fresh).catch((err) => console.warn(`[ProductResearcher] Product cache write failed: ${(err as Error).message}`));
+      const settings = await getAmazonPublicSettings().catch(() => null);
+      await cacheProducts(fresh, settings?.cacheTtlHours).catch((err) => console.warn(`[ProductResearcher] Product cache write failed: ${(err as Error).message}`));
     }
     const freshByAsin = new Map(fresh.map((product) => [product.asin.toUpperCase(), product]));
     products = asins.map((asin) => cachedByAsin.get(asin.toUpperCase()) || freshByAsin.get(asin.toUpperCase())).filter(Boolean) as AmazonProduct[];

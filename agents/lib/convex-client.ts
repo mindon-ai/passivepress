@@ -161,6 +161,17 @@ export async function getMetaAgentConfig(): Promise<MetaAgentConfig> {
   return convexQuery<MetaAgentConfig>("agentSettings:getMetaAgentForAgent", { secret: AGENT_SECRET });
 }
 
+export interface AmazonPublicSettings {
+  associateTag: string;
+  region: string;
+  marketplace: string;
+  cacheTtlHours: number;
+}
+
+export async function getAmazonPublicSettings(): Promise<AmazonPublicSettings> {
+  return convexQuery<AmazonPublicSettings>("affiliateSettings:getAmazonPublicSettings", {});
+}
+
 export interface PostLink {
   slug: string;
   title: string;
@@ -212,9 +223,9 @@ export async function getFreshCachedProducts(asins: string[]): Promise<AmazonPro
   return convexQuery<AmazonProduct[]>("productCache:getManyFresh", { asins, now: Date.now() });
 }
 
-export async function cacheProducts(products: AmazonProduct[]): Promise<{ count: number }> {
+export async function cacheProducts(products: AmazonProduct[], ttlHoursOverride?: number): Promise<{ count: number }> {
   if (!products.length) return { count: 0 };
-  const ttlHours = Number(process.env.PRODUCT_CACHE_TTL_HOURS || 24);
+  const ttlHours = ttlHoursOverride ?? Number(process.env.PRODUCT_CACHE_TTL_HOURS || 24);
   return convexMutation<{ count: number }>("productCache:upsertMany", { products, ttlHours });
 }
 
