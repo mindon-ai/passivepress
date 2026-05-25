@@ -6,7 +6,8 @@ import path from "path";
 import { fileURLToPath } from "url";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DEFAULT_IMAGE_OUTPUT_DIR = path.resolve(__dirname, "../../.tmp/generated-blog-images");
+const PROJECT_ROOT = path.resolve(__dirname, "../..");
+const DEFAULT_IMAGE_OUTPUT_DIR = path.resolve(PROJECT_ROOT, ".tmp/generated-blog-images");
 
 function resolveImageOutputDir(raw?: string): string {
   if (!raw?.trim()) return DEFAULT_IMAGE_OUTPUT_DIR;
@@ -21,8 +22,17 @@ function resolveImageOutputDir(raw?: string): string {
     return DEFAULT_IMAGE_OUTPUT_DIR;
   }
 
-  if (path.isAbsolute(value)) return value;
-  return path.resolve(__dirname, "..", value);
+  const resolved = path.isAbsolute(value) ? value : path.resolve(__dirname, "..", value);
+
+  // PassivePress was forked from NeuronPress; ignore stale absolute staging
+  // paths that would write generated images into the old project checkout.
+  const relativeToProject = path.relative(PROJECT_ROOT, resolved);
+  const isInsideProject = relativeToProject === "" || (!relativeToProject.startsWith("..") && !path.isAbsolute(relativeToProject));
+  if (!isInsideProject && /neuronpress/i.test(resolved)) {
+    return DEFAULT_IMAGE_OUTPUT_DIR;
+  }
+
+  return resolved;
 }
 
 /**

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_DIR="/home/el/projects/neuronpress"
+APP_DIR="/home/el/projects/passivepress"
 NODE_BIN="/home/el/.nvm/versions/node/v24.14.1/bin/node"
 PNPM_BIN="/home/el/.nvm/versions/node/v24.14.1/bin/pnpm"
 

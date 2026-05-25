@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_DIR="/home/el/projects/neuronpress"
+APP_DIR="/home/el/projects/passivepress"
 DEPLOY_ENV_FILE="${DEPLOY_ENV_FILE:-$APP_DIR/.deploy.local}"
 REMOTE_NAME="${REMOTE_NAME:-origin}"
 DRY_RUN="${DRY_RUN:-0}"
@@ -63,4 +63,4 @@ fi
 git push "$REMOTE_NAME" "$BRANCH"
 
 echo "Frontend deployment triggered via Git push to $REMOTE_NAME/$BRANCH"
- echo "Cloudflare Pages will build from the pushed repository state"
+echo "Cloudflare Pages will build from the pushed repository state"

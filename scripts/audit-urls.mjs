@@ -4,7 +4,7 @@
  * Flags URLs by category: download extensions, suspicious TLDs, shortened URLs, etc.
  */
 
-const CONVEX_URL = "https://outstanding-rabbit-941.convex.cloud";
+const CONVEX_URL = (process.env.CONVEX_URL ?? process.env.VITE_CONVEX_URL ?? "https://blessed-clam-266.convex.cloud").replace(/\/$/, "");
 
 // Regex to extract all http/https URLs from markdown content
 const URL_REGEX = /https?:\/\/[^\s\)\]\'"<>]+/gi;
@@ -41,7 +41,7 @@ const SAFE_DOMAINS = [
   "towardsdatascience.com",
   "medium.com",
   "wikipedia.org",
-  "neuronpress.qzz.io",
+  "passivepress.qzz.io",
   "convex.cloud",
   "convex.site",
   "googletagmanager.com",

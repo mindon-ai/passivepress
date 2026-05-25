@@ -126,19 +126,29 @@ function readPipelineLogs(lastN: number): LogSummary[] {
   return summaries;
 }
 
+function normalizePassivePressCategory(category: string | undefined): string {
+  const slug = (category || "unknown").trim();
+  if (["tech", "home-appliances", "fitness", "outdoors", "kitchen"].includes(slug)) return slug;
+
+  // PassivePress was forked from NeuronPress, and older local dry-run logs may
+  // still contain legacy AI categories. Keep MetaAgent launch QA focused on the
+  // current affiliate taxonomy instead of showing stale NeuronPress buckets.
+  if (["ai-news", "llms", "image-ai", "ai-coding", "ai-business", "ai-research"].includes(slug)) return "tech";
+  return "unknown";
+}
+
 function computePipelineMetrics(logs: LogSummary[]): PipelineMetrics {
   const runsWithTelemetry = logs.filter((l) => l.hasTelemetry);
   const categoryDistribution: Record<string, number> = {
-    "ai-news": 0,
-    llms: 0,
-    "image-ai": 0,
-    "ai-coding": 0,
-    "ai-business": 0,
-    "ai-research": 0,
+    tech: 0,
+    "home-appliances": 0,
+    fitness: 0,
+    outdoors: 0,
+    kitchen: 0,
   };
 
   for (const log of logs) {
-    const category = log.chosen.category || "unknown";
+    const category = normalizePassivePressCategory(log.chosen.category);
     categoryDistribution[category] = (categoryDistribution[category] ?? 0) + 1;
   }
 
@@ -208,7 +218,7 @@ function computePipelineMetrics(logs: LogSummary[]): PipelineMetrics {
     stepFailures,
     recentSlugs: logs.slice(0, 5).map((l) => l.draft.slug).filter(Boolean),
     recentTitles: logs.slice(0, 5).map((l) => l.chosen.title).filter(Boolean),
-    recentCategories: logs.slice(0, 5).map((l) => l.chosen.category).filter(Boolean),
+    recentCategories: logs.slice(0, 5).map((l) => normalizePassivePressCategory(l.chosen.category)).filter(Boolean),
   };
 }
 

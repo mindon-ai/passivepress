@@ -43,11 +43,11 @@ const DEFAULT_TREND_SCOUT_CONFIG: TrendScoutConfig = {
 };
 
 const NICHE_KEYWORDS: Record<string, string[]> = {
-  tech: ["laptop", "monitor", "keyboard", "mouse", "headphones", "earbuds", "charger", "tablet", "router", "ssd", "phone", "camera"],
-  "home-appliances": ["vacuum", "robot vacuum", "air purifier", "coffee maker", "espresso", "dishwasher", "humidifier", "dehumidifier", "mattress", "standing desk"],
-  fitness: ["treadmill", "exercise bike", "adjustable dumbbells", "fitness tracker", "running shoes", "rower", "yoga mat", "protein powder"],
-  outdoors: ["tent", "cooler", "backpack", "hiking boots", "camping stove", "sleeping bag"],
-  kitchen: ["air fryer", "blender", "knife set", "cookware", "stand mixer", "rice cooker"],
+  tech: ["laptop", "laptops", "monitor", "monitors", "keyboard", "keyboards", "mouse", "mice", "headphone", "headphones", "earbud", "earbuds", "charger", "chargers", "tablet", "tablets", "router", "routers", "ssd", "phone", "phones", "camera", "cameras", "gpu", "graphics card"],
+  "home-appliances": ["vacuum", "vacuums", "robot vacuum", "robot vacuums", "air purifier", "air purifiers", "coffee maker", "coffee makers", "espresso", "dishwasher", "dishwashers", "humidifier", "humidifiers", "dehumidifier", "dehumidifiers", "mattress", "mattresses", "standing desk", "standing desks", "fridge", "refrigerator"],
+  fitness: ["treadmill", "treadmills", "exercise bike", "exercise bikes", "adjustable dumbbell", "adjustable dumbbells", "fitness tracker", "fitness trackers", "running shoe", "running shoes", "rower", "rowers", "yoga mat", "protein powder"],
+  outdoors: ["tent", "tents", "cooler", "coolers", "backpack", "backpacks", "hiking boot", "hiking boots", "camping stove", "camping stoves", "sleeping bag", "sleeping bags"],
+  kitchen: ["air fryer", "air fryers", "blender", "blenders", "knife set", "cookware", "stand mixer", "stand mixers", "rice cooker", "rice cookers"],
 };
 
 const BUYING_INTENT_PATTERNS = [
@@ -64,7 +64,16 @@ const BUYING_INTENT_PATTERNS = [
 
 const PRODUCT_STOPWORDS = new Set([
   "best", "top", "review", "reviews", "under", "for", "with", "without", "the", "and", "or", "buy", "buying", "guide", "deal", "deals", "amazon", "2025", "2026", "reddit", "vs", "comparison",
+  "what", "which", "where", "when", "why", "how", "is", "are", "was", "were", "good", "right", "now", "worth", "suggest", "recommend", "recommendation", "people", "actually", "these", "days",
 ]);
+
+const GENERIC_PRODUCT_HINTS: Record<string, string[]> = {
+  tech: ["laptop", "monitor", "noise-canceling headphones", "USB-C charger", "wireless keyboard"],
+  "home-appliances": ["robot vacuum", "air purifier", "standing desk", "humidifier", "coffee maker"],
+  fitness: ["fitness tracker", "adjustable dumbbells", "treadmill", "exercise bike", "running shoes"],
+  outdoors: ["camping tent", "hiking backpack", "cooler", "camping stove", "sleeping bag"],
+  kitchen: ["air fryer", "blender", "knife set", "cookware set", "rice cooker"],
+};
 
 function isLegacyAiTrendConfig(config: TrendScoutConfig): boolean {
   const queryText = [
@@ -88,16 +97,26 @@ function getEnabledNiches(config: TrendScoutConfig): string[] {
   return Array.isArray(custom) && custom.length ? custom : DEFAULT_NICHES;
 }
 
+function keywordRegex(keyword: string): RegExp {
+  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\\ /g, "\\s+");
+  return new RegExp(`\\b${escaped}\\b`, "i");
+}
+
 function guessNiche(text: string, enabledNiches = DEFAULT_NICHES): string {
-  const lower = text.toLowerCase();
-  let best = enabledNiches[0] || process.env.AFFILIATE_DEFAULT_NICHE || "tech";
-  let bestCount = 0;
+  const fallback = enabledNiches.includes(process.env.AFFILIATE_DEFAULT_NICHE || "")
+    ? process.env.AFFILIATE_DEFAULT_NICHE!
+    : enabledNiches[0] || "tech";
+  let best = fallback;
+  let bestScore = 0;
   for (const niche of enabledNiches) {
     const keywords = NICHE_KEYWORDS[niche] || [];
-    const count = keywords.filter((keyword) => lower.includes(keyword)).length;
-    if (count > bestCount) {
+    const score = keywords.reduce((total, keyword) => {
+      if (!keywordRegex(keyword).test(text)) return total;
+      return total + (keyword.includes(" ") ? 3 : 1);
+    }, 0);
+    if (score > bestScore) {
       best = niche;
-      bestCount = count;
+      bestScore = score;
     }
   }
   return best;
@@ -126,17 +145,48 @@ function estimateSearchVolume(title: string): number {
   return estimate;
 }
 
-function extractProductHints(title: string, snippet = ""): string[] {
-  const text = `${title} ${snippet}`;
+function cleanTopicTitle(title: string): string {
+  return title
+    .replace(/\s*[|-]\s*(Reddit|YouTube|The Verge|PCMag|Wirecutter|BTOD\.com|Raleigh News & Observer)\s*$/i, "")
+    .replace(/^\s*(what|which)\s+is\s+the\s+/i, "Best ")
+    .replace(/\s+people\s+actually\s+recommend\s+these\s+days\??$/i, "")
+    .replace(/\s+right\s+now\??$/i, "")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function titleCaseProductHint(value: string): string {
+  return value
+    .split(/\s+/)
+    .map((word) => PRODUCT_STOPWORDS.has(word.toLowerCase()) ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ")
+    .trim();
+}
+
+function extractProductHints(title: string, snippet = "", niche = "tech"): string[] {
+  const cleanedTitle = cleanTopicTitle(title);
+  const text = `${cleanedTitle} ${snippet}`;
   const quoted = [...text.matchAll(/[“"]([^”"]{3,60})[”"]/g)].map((match) => match[1]);
   const capitalized = [...text.matchAll(/\b([A-Z][A-Za-z0-9+.-]*(?:\s+[A-Z][A-Za-z0-9+.-]*){0,4})\b/g)]
     .map((match) => match[1])
-    .filter((value) => !PRODUCT_STOPWORDS.has(value.toLowerCase()) && value.length > 2);
-  const nounPhrase = title
-    .replace(/\b(best|top|review|reviews|under|for|to buy|in 2025|in 2026|2025|2026)\b/gi, " ")
+    .filter((value) => {
+      const words = value.toLowerCase().split(/\s+/).filter(Boolean);
+      return value.length > 2 && words.some((word) => !PRODUCT_STOPWORDS.has(word)) && !/^(reddit|youtube|wirecutter|pcmag)$/i.test(value);
+    });
+  const nounPhrase = cleanedTitle
+    .replace(/\b(best|top|review|reviews|under|for|to buy|in 2025|in 2026|2025|2026|may)\b/gi, " ")
+    .replace(/\$?\d+[a-z]?/gi, " ")
     .replace(/[^a-zA-Z0-9+ -]/g, " ")
+    .replace(/\s+/g, " ")
     .trim();
-  return [...new Set([...quoted, ...capitalized, nounPhrase].map((value) => value.trim()).filter((value) => value.length >= 3))].slice(0, 8);
+  const hints = [...new Set([...quoted, ...capitalized, nounPhrase]
+    .map((value) => titleCaseProductHint(value.trim()))
+    .filter((value) => {
+      const words = value.toLowerCase().split(/\s+/).filter(Boolean);
+      return value.length >= 3 && words.some((word) => !PRODUCT_STOPWORDS.has(word));
+    }))]
+    .slice(0, 8);
+  return hints.length ? hints : (GENERIC_PRODUCT_HINTS[niche] || GENERIC_PRODUCT_HINTS.tech);
 }
 
 function scoreAffiliateTopic(title: string, snippet: string, points: number, maxPoints: number, existingTitles: string[], config: TrendScoutConfig): number {
@@ -162,19 +212,21 @@ function toTrendTopic(args: {
   score: number;
   enabledNiches: string[];
 }): TrendTopic {
-  const text = `${args.title} ${args.snippet || ""}`;
+  const rawTitle = args.title;
+  const title = cleanTopicTitle(rawTitle) || rawTitle;
+  const text = `${title} ${args.snippet || ""}`;
   const niche = guessNiche(text, args.enabledNiches);
   return {
-    title: args.title,
+    title,
     source: args.source,
     url: args.url,
     score: args.score,
     suggestedCategory: niche,
     sourceTier: detectSourceTier(args.source, args.url),
     niche,
-    contentType: inferContentType(args.title),
-    productHints: extractProductHints(args.title, args.snippet),
-    searchVolume: estimateSearchVolume(args.title),
+    contentType: inferContentType(title),
+    productHints: extractProductHints(title, args.snippet, niche),
+    searchVolume: estimateSearchVolume(title),
     sourceUrls: args.url ? [args.url] : [],
   };
 }

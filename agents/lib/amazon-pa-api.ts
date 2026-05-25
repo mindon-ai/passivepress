@@ -1,3 +1,5 @@
+// Deprecated: PassivePress now uses ./rainforest-api.ts for Amazon product data.
+// Keep this PA API client temporarily for rollback/backward compatibility.
 import crypto from "node:crypto";
 import { fetchWithTimeout } from "./http-utils.ts";
 import { buildAmazonAffiliateUrl } from "./affiliate-utils.ts";

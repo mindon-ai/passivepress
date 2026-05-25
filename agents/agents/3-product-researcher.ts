@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { getItems, searchItems } from "../lib/amazon-pa-api.ts";
+import { getItems, searchItems } from "../lib/rainforest-api.ts";
 import { buildAmazonAffiliateUrl } from "../lib/affiliate-utils.ts";
 import { cacheProducts, getAmazonPublicSettings, getFreshCachedProducts } from "../lib/convex-client.ts";
 import * as webResearcher from "./8-researcher.ts";
@@ -23,9 +23,26 @@ function fallbackProduct(name: string, category: string): AmazonProduct {
   };
 }
 
+function normalizeProductQueries(topic: ChosenTopic): string[] {
+  const genericByCategory: Record<string, string[]> = {
+    tech: ["laptop", "monitor", "noise-canceling headphones", "USB-C charger"],
+    "home-appliances": ["robot vacuum", "air purifier", "standing desk", "humidifier"],
+    fitness: ["fitness tracker", "adjustable dumbbells", "treadmill", "exercise bike"],
+    outdoors: ["camping tent", "hiking backpack", "cooler", "camping stove"],
+    kitchen: ["air fryer", "blender", "knife set", "cookware set"],
+  };
+  const source = topic.targetProducts?.length ? topic.targetProducts : topic.entities?.length ? topic.entities : [topic.title];
+  const cleaned = source
+    .map((query) => String(query).replace(/\s*[|-]\s*(Reddit|YouTube|Wirecutter|PCMag|The Verge|Wareable).*$/i, "").replace(/[^a-zA-Z0-9+ .-]/g, " ").replace(/\s+/g, " ").trim())
+    .filter((query) => query.length >= 4 && !/^(what|which|where|when|why|how|best|top|review|worth|looking)$/i.test(query))
+    .filter((query) => query.split(/\s+/).length <= 8);
+  const unique = [...new Set(cleaned)].slice(0, 8);
+  return unique.length ? unique : (genericByCategory[topic.category] || genericByCategory.tech);
+}
+
 export async function run(topic: ChosenTopic): Promise<ProductResearchData> {
   console.log(`[ProductResearcher] Researching products for: "${topic.title}"`);
-  const productQueries = (topic.targetProducts?.length ? topic.targetProducts : topic.entities?.length ? topic.entities : [topic.title]).slice(0, 8);
+  const productQueries = normalizeProductQueries(topic);
   const searchIndex = topic.affiliateCategory || topic.category || "All";
   let products: AmazonProduct[] = [];
 
@@ -45,9 +62,9 @@ export async function run(topic: ChosenTopic): Promise<ProductResearchData> {
     }
     const freshByAsin = new Map(fresh.map((product) => [product.asin.toUpperCase(), product]));
     products = asins.map((asin) => cachedByAsin.get(asin.toUpperCase()) || freshByAsin.get(asin.toUpperCase())).filter(Boolean) as AmazonProduct[];
-    console.log(`[ProductResearcher] Loaded ${products.length} Amazon product(s): ${cached.length} cached, ${fresh.length} fresh.`);
+    console.log(`[ProductResearcher] Loaded ${products.length} RainforestAPI-backed Amazon product(s): ${cached.length} cached, ${fresh.length} fresh.`);
   } catch (err) {
-    console.warn(`[ProductResearcher] Amazon PA API unavailable; using placeholder product records: ${(err as Error).message}`);
+    console.warn(`[ProductResearcher] RainforestAPI unavailable; using placeholder product records: ${(err as Error).message}`);
     products = productQueries.map((query) => fallbackProduct(query, topic.category));
   }
 

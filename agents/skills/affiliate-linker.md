@@ -8,4 +8,4 @@ Placeholder rules:
 - `{{BUY_BUTTON:ASIN:Label}}` becomes a CTA link with the `.affiliate-cta` marker.
 - `{{PRICE:ASIN}}` becomes the cached publish-time price.
 
-Do not cloak links. Use plain Amazon `/dp/ASIN?tag=...` URLs when PA API does not return a detail URL.
+Do not cloak links. Use plain Amazon `/dp/ASIN?tag=...` URLs when RainforestAPI does not return a usable Amazon detail URL.

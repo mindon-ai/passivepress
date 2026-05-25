@@ -25,7 +25,7 @@ const returnTopicParams = Type.Object({
   keywords: Type.Optional(Type.Array(Type.String(), { description: "5–10 highly specific buyer-intent SEO tags" })),
   sourceUrls: Type.Optional(Type.Array(Type.String(), { description: "Primary source URLs for this topic" })),
   contentType: Type.Optional(Type.String({ description: "buyer-guide | single-review | comparison | top-n-list" })),
-  targetProducts: Type.Optional(Type.Array(Type.String(), { description: "Product names or models to research via Amazon PA API" })),
+  targetProducts: Type.Optional(Type.Array(Type.String(), { description: "Product names or models to research via RainforestAPI-backed Amazon product data" })),
   affiliateCategory: Type.Optional(Type.String({ description: "Amazon SearchIndex/category hint, e.g. Electronics, HomeAndKitchen, SportsAndOutdoors" })),
 });
 

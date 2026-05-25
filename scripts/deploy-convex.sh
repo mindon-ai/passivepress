@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-APP_DIR="/home/el/projects/neuronpress"
+APP_DIR="/home/el/projects/passivepress"
 DEPLOY_ENV_FILE="${DEPLOY_ENV_FILE:-$APP_DIR/.deploy.local}"
 AGENTS_ENV_FILE="$APP_DIR/agents/.env"
 

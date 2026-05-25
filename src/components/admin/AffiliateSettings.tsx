@@ -11,9 +11,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 const affiliateDefaults = {
+  provider: "rainforestapi",
   associateTag: "yourstore-20",
   region: "us-east-1",
   marketplace: "www.amazon.com",
+  amazonDomain: "amazon.com",
+  currency: "USD",
   cacheTtlHours: 24,
 };
 
@@ -25,14 +28,14 @@ function numberValue(value: string, fallback: number) {
 }
 
 export function AffiliateSettings() {
-  const saved = useQuery(api.affiliateSettings.getAmazonPublicSettings, {}) as AffiliateSettingsConfig | undefined;
+  const saved = useQuery(api.affiliateSettings.getAmazonPublicSettings, {}) as Partial<AffiliateSettingsConfig> | undefined;
   const updateSettings = useMutation(api.affiliateSettings.updateAmazonPublicSettings);
   const resetSettings = useMutation(api.affiliateSettings.resetAmazonPublicSettings);
   const [config, setConfig] = useState<AffiliateSettingsConfig>(affiliateDefaults);
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    if (saved) setConfig(saved);
+    if (saved) setConfig({ ...affiliateDefaults, ...saved });
   }, [saved]);
 
   const status = useMemo(() => saved ? "Loaded from Convex agentSettings" : "Using code defaults", [saved]);
@@ -97,19 +100,31 @@ export function AffiliateSettings() {
             <Input value={config.associateTag} onChange={(event) => setConfig((c) => ({ ...c, associateTag: event.target.value }))} />
           </div>
           <div className="space-y-2">
-            <Label>PA API region</Label>
-            <Input value={config.region} onChange={(event) => setConfig((c) => ({ ...c, region: event.target.value }))} />
+            <Label>Provider</Label>
+            <Input value={config.provider} onChange={(event) => setConfig((c) => ({ ...c, provider: event.target.value }))} />
           </div>
           <div className="space-y-2">
-            <Label>Marketplace</Label>
+            <Label>Amazon domain</Label>
+            <Input value={config.amazonDomain} onChange={(event) => setConfig((c) => ({ ...c, amazonDomain: event.target.value }))} />
+          </div>
+          <div className="space-y-2">
+            <Label>Marketplace host</Label>
             <Input value={config.marketplace} onChange={(event) => setConfig((c) => ({ ...c, marketplace: event.target.value }))} />
+          </div>
+          <div className="space-y-2">
+            <Label>Currency</Label>
+            <Input value={config.currency} onChange={(event) => setConfig((c) => ({ ...c, currency: event.target.value.toUpperCase() }))} />
+          </div>
+          <div className="space-y-2">
+            <Label>Legacy PA API region</Label>
+            <Input value={config.region} onChange={(event) => setConfig((c) => ({ ...c, region: event.target.value }))} />
           </div>
           <div className="space-y-2">
             <Label>Product cache TTL hours</Label>
             <Input type="number" min={1} value={config.cacheTtlHours} onChange={(event) => setConfig((c) => ({ ...c, cacheTtlHours: numberValue(event.target.value, c.cacheTtlHours) }))} />
           </div>
           <div className="md:col-span-2 rounded-md border border-dashed border-border p-4 text-xs text-muted-foreground">
-            Required secret environment variables: AMAZON_ACCESS_KEY, AMAZON_SECRET_KEY, AMAZON_ASSOCIATE_TAG, AMAZON_REGION. Do not paste secrets into this UI.
+            Required secret environment variables: RAINFOREST_API_KEY and AMAZON_ASSOCIATE_TAG. Optional: RAINFOREST_AMAZON_DOMAIN, RAINFOREST_CURRENCY, RAINFOREST_CUSTOMER_LOCATION, RAINFOREST_CUSTOMER_ZIPCODE, RAINFOREST_LANGUAGE. Do not paste secrets into this UI.
           </div>
         </CardContent>
       </Card>

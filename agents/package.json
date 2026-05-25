@@ -11,6 +11,7 @@
     "test:image": "tsx agents/3-image-gen.ts",
     "test:writer": "tsx agents/4-writer.ts",
     "test:researcher": "tsx agents/3-product-researcher.ts",
+    "test:rainforest": "tsx lib/rainforest-api.ts",
     "test:dataviz": "tsx agents/9-dataviz.ts",
     "test:convex": "tsx lib/convex-client.ts",
     "test:skills": "tsx -e \"import { listSkills } from './lib/skill-loader.ts'; console.log('Skills:', listSkills());\"",

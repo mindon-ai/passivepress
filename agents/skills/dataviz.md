@@ -7,7 +7,7 @@ as interactive charts in the article via the Recharts library.
 
 ## When to create charts
 Only create charts when the research data contains real, concrete numeric data:
-- Product price comparisons from Amazon PA API data
+- Product price comparisons from RainforestAPI-backed Amazon product data
 - Rating/review-count comparisons across products in a buyer guide
 - Benchmark, cost, speed, battery, or spec comparisons from real source data
 

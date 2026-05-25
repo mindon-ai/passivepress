@@ -162,9 +162,12 @@ export async function getMetaAgentConfig(): Promise<MetaAgentConfig> {
 }
 
 export interface AmazonPublicSettings {
+  provider?: string;
   associateTag: string;
   region: string;
   marketplace: string;
+  amazonDomain?: string;
+  currency?: string;
   cacheTtlHours: number;
 }
 

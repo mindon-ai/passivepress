@@ -2,12 +2,15 @@ import { v } from "convex/values";
 import { mutation, query } from "./_generated/server";
 import { requireAdmin } from "./lib/authz";
 
-const AMAZON_SETTINGS_ID = "amazon-pa-api";
+const AMAZON_SETTINGS_ID = "amazon-rainforestapi";
 
 const publicDefaults = {
+  provider: "rainforestapi",
   associateTag: "yourstore-20",
   region: "us-east-1",
   marketplace: "www.amazon.com",
+  amazonDomain: "amazon.com",
+  currency: "USD",
   cacheTtlHours: 24,
 };
 
@@ -25,9 +28,12 @@ export const getAmazonPublicSettings = query({
 export const updateAmazonPublicSettings = mutation({
   args: {
     config: v.object({
+      provider: v.optional(v.string()),
       associateTag: v.string(),
       region: v.string(),
       marketplace: v.string(),
+      amazonDomain: v.optional(v.string()),
+      currency: v.optional(v.string()),
       cacheTtlHours: v.number(),
     }),
   },

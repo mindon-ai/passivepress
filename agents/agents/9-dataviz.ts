@@ -122,7 +122,7 @@ function buildProductComparison(topic: ChosenTopic, research: ProductResearchDat
       series: [{ key: "price", label: `Price (${priceProducts[0].price.currency || "USD"})`, color: DEFAULT_COLORS[0] }],
       data: priceProducts.map((product) => ({ product: product.title.slice(0, 34), price: product.price.current })),
       insight: "Prices are cached at publish time and may vary on Amazon.",
-      sourceLabel: "Amazon PA API at publish time",
+      sourceLabel: "RainforestAPI-backed Amazon data at publish time",
     });
   }
 
@@ -137,7 +137,7 @@ function buildProductComparison(topic: ChosenTopic, research: ProductResearchDat
       series: [{ key: "rating", label: "Rating", color: DEFAULT_COLORS[1] }],
       data: ratedProducts.map((product) => ({ product: product.title.slice(0, 34), rating: product.rating })),
       insight: "Use ratings as one signal alongside price, availability, features, and review count.",
-      sourceLabel: "Amazon PA API at publish time",
+      sourceLabel: "RainforestAPI-backed Amazon data at publish time",
     });
   }
 

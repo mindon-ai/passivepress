@@ -110,7 +110,7 @@ function buildUserPrompt(ctx: AuditContext): string {
   const dynamicPayload = JSON.stringify(safeCtx, null, 2);
 
   // Keep the audit instruction prefix distinct from the large runtime context payload.
-  return `${instructionPrompt}\n\nHere is the full AuditContext for NeuronPress.\n\n${dynamicPayload}`;
+  return `${instructionPrompt}\n\nHere is the full AuditContext for PassivePress.\n\n${dynamicPayload}`;
 }
 
 function pickSourceSubset(sources: Record<string, string>): Record<string, string> {
@@ -174,7 +174,7 @@ async function run(): Promise<void> {
   const backupDir = getBackupDir();
 
   console.log("\n╔══════════════════════════════════════════════════╗");
-  console.log("║     NeuronPress MetaAgent — Starting Analysis    ║");
+  console.log("║     PassivePress MetaAgent — Starting Analysis   ║");
   console.log("╚══════════════════════════════════════════════════╝\n");
   console.log(`Mode    : ${opts.reportOnly ? "REPORT ONLY" : opts.applyAll ? "APPLY ALL" : "INTERACTIVE"}`);
   console.log(`Runs    : last ${opts.lastN}`);
@@ -413,7 +413,7 @@ Applied: ${applied.length} | Skipped: ${skipped.length}
 
 function printReport(report: MetaReport): void {
   console.log(`\n${"═".repeat(60)}`);
-  console.log("  NeuronPress MetaAgent — Improvement Report");
+  console.log("  PassivePress MetaAgent — Improvement Report");
   console.log(`${"═".repeat(60)}`);
   console.log(`Generated  : ${report.generatedAt}`);
   console.log(`Runs       : ${report.runsAnalyzed}`);

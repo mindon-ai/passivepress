@@ -24,11 +24,11 @@ import {
 import { runOneShotPiAgent } from "../lib/pi-agent-utils.ts";
 import { createReturnTopicTool, type RawTopicChoice } from "../extensions/topic-picker-tools.ts";
 import type { ChosenTopic, SourceTier, TopicPickerConfig, TrendTopic } from "../types/pipeline.ts";
-import { VALID_CATEGORY_SLUGS, type CategorySlug } from "../lib/categories.ts";
+import type { CategorySlug } from "../lib/categories.ts";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const LOGS_DIR = path.resolve(__dirname, "../logs");
-const VALID_CATEGORIES = [...VALID_CATEGORY_SLUGS];
+const PASSIVEPRESS_CATEGORY_SLUGS = ["tech", "home-appliances", "fitness", "outdoors", "kitchen"] as const;
 const AFFILIATE_CONTENT_TYPES = ["buyer-guide", "single-review", "comparison", "top-n-list"] as const;
 const RECENT_LOG_LIMIT = 12;
 
@@ -137,7 +137,7 @@ function sourceTierRank(tier?: SourceTier): number {
 function filterCandidates(candidates: TrendTopic[], config: TopicPickerConfig): TrendTopic[] {
   const minimumRank = sourceTierRank(config.sourceRules.minimumSourceTier);
   const enabledCategories = new Set(config.categoryRules.enabledCategories);
-  return candidates.filter((topic) => {
+  const filtered = candidates.filter((topic) => {
     const category = mapCategory(topic.suggestedCategory || topic.niche || "tech");
     if (!enabledCategories.has(category)) return false;
     const tier = topic.sourceTier ?? detectSourceTier(topic.source, topic.url);
@@ -146,6 +146,24 @@ function filterCandidates(candidates: TrendTopic[], config: TopicPickerConfig): 
     if (tier === "aggregator" && !config.sourceRules.allowAggregator) return false;
     return true;
   });
+
+  if (!filtered.length) {
+    const availableCategories = [...new Set(candidates.map((topic) => mapCategory(topic.suggestedCategory || topic.niche || "tech")))];
+    const availableTiers = [...new Set(candidates.map((topic) => topic.sourceTier ?? detectSourceTier(topic.source, topic.url)))];
+    console.warn(
+      `[TopicPicker] Convex filters removed all candidates ` +
+      `(enabledCategories=${[...enabledCategories].join(",") || "none"}; ` +
+      `availableCategories=${availableCategories.join(",") || "none"}; ` +
+      `minimumSourceTier=${config.sourceRules.minimumSourceTier}; availableTiers=${availableTiers.join(",") || "none"}). ` +
+      `Using PassivePress-safe candidate fallback for this run.`
+    );
+    return candidates.filter((topic) => {
+      const category = mapCategory(topic.suggestedCategory || topic.niche || "tech");
+      return (PASSIVEPRESS_CATEGORY_SLUGS as readonly string[]).includes(category);
+    });
+  }
+
+  return filtered;
 }
 
 function scoreCandidates(candidates: TrendTopic[], history: TopicHistoryEntry[], recentCategories: string[]): ScoredTopic[] {
@@ -284,7 +302,7 @@ export async function run(trends: TrendTopic[]): Promise<ChosenTopic> {
       `Choose the single best buyer-intent affiliate topic for today's PassivePress article.\n\n` +
       `## Candidate Topics\n${candidatesText}\n\n` +
       `## Context\n${contextBlock || "No extra context configured."}\n\n` +
-      `Choose ${config.keywordRules.minKeywords}-${config.keywordRules.maxKeywords} buyer-intent SEO keywords. Also return contentType, targetProducts, and affiliateCategory for Amazon PA API lookup. ` +
+      `Choose ${config.keywordRules.minKeywords}-${config.keywordRules.maxKeywords} buyer-intent SEO keywords. Also return contentType, targetProducts, and affiliateCategory for RainforestAPI-backed Amazon lookup. ` +
       `Headline must be under ${config.angleRules.headlineMaxChars} characters. ` +
       `Angle should be ${config.angleRules.minSentences}-${config.angleRules.maxSentences} sentences. ` +
       `${config.keywordRules.requireLongTail ? "Include long-tail keyword phrases. " : ""}` +
@@ -320,7 +338,8 @@ export async function run(trends: TrendTopic[]): Promise<ChosenTopic> {
 
   rawChoice = normalizeRawChoice(rawChoice, fallbackTopic, config);
   let category: CategorySlug = mapCategory(rawChoice.category);
-  if (!VALID_CATEGORIES.includes(category)) category = mapCategory(fallbackTopic.suggestedCategory);
+  if (!(PASSIVEPRESS_CATEGORY_SLUGS as readonly string[]).includes(category)) category = mapCategory(fallbackTopic.suggestedCategory);
+  if (!(PASSIVEPRESS_CATEGORY_SLUGS as readonly string[]).includes(category)) category = "tech";
 
   const chosenSignals = scoreChosenTopicStrategy({
     title: rawChoice.title,
@@ -347,7 +366,8 @@ export async function run(trends: TrendTopic[]): Promise<ChosenTopic> {
 
   rawChoice = normalizeRawChoice(rawChoice, fallbackTopic, config);
   category = mapCategory(rawChoice.category);
-  if (!VALID_CATEGORIES.includes(category)) category = mapCategory(fallbackTopic.suggestedCategory);
+  if (!(PASSIVEPRESS_CATEGORY_SLUGS as readonly string[]).includes(category)) category = mapCategory(fallbackTopic.suggestedCategory);
+  if (!(PASSIVEPRESS_CATEGORY_SLUGS as readonly string[]).includes(category)) category = "tech";
 
   if (config.categoryRules.allowCategoryOverride && config.fallbackRules.overrideOverusedCategory && recentCategories.filter((c) => c === category).length >= config.categoryRules.overusedCategoryThreshold && fallbackTopic.title !== rawChoice.title) {
     console.warn(`[TopicPicker] Rotation: replacing overused category "${category}" with fallback topic in "${fallbackTopic.suggestedCategory}"`);
@@ -357,7 +377,8 @@ export async function run(trends: TrendTopic[]): Promise<ChosenTopic> {
 
   rawChoice = normalizeRawChoice(rawChoice, fallbackTopic, config);
   category = mapCategory(rawChoice.category);
-  if (!VALID_CATEGORIES.includes(category)) category = mapCategory(fallbackTopic.suggestedCategory);
+  if (!(PASSIVEPRESS_CATEGORY_SLUGS as readonly string[]).includes(category)) category = mapCategory(fallbackTopic.suggestedCategory);
+  if (!(PASSIVEPRESS_CATEGORY_SLUGS as readonly string[]).includes(category)) category = "tech";
 
   const finalSourceTier = detectSourceTier(undefined, rawChoice.sourceUrls[0]);
   const finalEntities = extractTopicEntities(rawChoice.title, rawChoice.angle, ...rawChoice.keywords);
@@ -368,9 +389,10 @@ export async function run(trends: TrendTopic[]): Promise<ChosenTopic> {
     categoryId = cat?.id ?? "";
     if (!categoryId) {
       const fallbackCategory = mapCategory(config.categoryRules.defaultFallbackCategory);
-      const fallback = await getCategoryBySlug(fallbackCategory);
+      const passiveFallbackCategory = (PASSIVEPRESS_CATEGORY_SLUGS as readonly string[]).includes(fallbackCategory) ? fallbackCategory : "tech";
+      const fallback = await getCategoryBySlug(passiveFallbackCategory);
       categoryId = fallback?.id ?? "";
-      category = fallbackCategory;
+      category = passiveFallbackCategory;
     }
   } catch (err) {
     console.warn("[TopicPicker] Convex category lookup failed:", (err as Error).message);
