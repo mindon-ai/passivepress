@@ -3,7 +3,7 @@ import { toSlug } from "../lib/slug.ts";
 import { loadSkill } from "../lib/skill-loader.ts";
 import { runOneShotPiAgent } from "../lib/pi-agent-utils.ts";
 import { createReturnDatavizTool } from "../extensions/dataviz-tools.ts";
-import type { ChosenTopic, DataVizConfig, DataVizResult, ResearchData } from "../types/pipeline.ts";
+import type { ChosenTopic, DataVizChart, DataVizConfig, DataVizResult, ProductResearchData, ResearchData } from "../types/pipeline.ts";
 
 const DEFAULT_COLORS = [
   "hsl(var(--chart-1))",
@@ -99,6 +99,55 @@ function countNumericBenchmarks(research?: ResearchData): number {
   return research.benchmarks.filter((benchmark) => Number.isFinite(Number(String(benchmark.score).replace(/[%,$]/g, "").trim()))).length;
 }
 
+function isProductResearch(research?: ResearchData): research is ProductResearchData {
+  return Array.isArray((research as ProductResearchData | undefined)?.products);
+}
+
+function buildProductComparison(topic: ChosenTopic, research: ProductResearchData, config: DataVizConfig): DataVizResult {
+  const products = research.products
+    .filter((product) => product.price?.current > 0 || product.rating > 0 || product.reviewCount > 0)
+    .slice(0, config.chartRules.maxDataPointsPerChart);
+
+  if (products.length < 2) return { charts: [], content: "" };
+
+  const charts: DataVizChart[] = [];
+  const priceProducts = products.filter((product) => product.price?.current > 0);
+  if (priceProducts.length >= 2) {
+    charts.push({
+      id: `${toSlug(topic.title)}-price-comparison`,
+      title: "Publish-time price comparison",
+      description: "Cached Amazon prices for the products included in this guide.",
+      type: "bar",
+      xKey: "product",
+      series: [{ key: "price", label: `Price (${priceProducts[0].price.currency || "USD"})`, color: DEFAULT_COLORS[0] }],
+      data: priceProducts.map((product) => ({ product: product.title.slice(0, 34), price: product.price.current })),
+      insight: "Prices are cached at publish time and may vary on Amazon.",
+      sourceLabel: "Amazon PA API at publish time",
+    });
+  }
+
+  const ratedProducts = products.filter((product) => product.rating > 0);
+  if (ratedProducts.length >= 2 && charts.length < config.chartRules.maxCharts) {
+    charts.push({
+      id: `${toSlug(topic.title)}-rating-comparison`,
+      title: "Customer rating comparison",
+      description: "Amazon star ratings for products in the guide.",
+      type: "bar",
+      xKey: "product",
+      series: [{ key: "rating", label: "Rating", color: DEFAULT_COLORS[1] }],
+      data: ratedProducts.map((product) => ({ product: product.title.slice(0, 34), rating: product.rating })),
+      insight: "Use ratings as one signal alongside price, availability, features, and review count.",
+      sourceLabel: "Amazon PA API at publish time",
+    });
+  }
+
+  const content = charts.map((chart) =>
+    `### ${chart.title}\n\n${chart.description} ${chart.insight ?? ""}\n\n\`\`\`chart\n${JSON.stringify(chart)}\n\`\`\``
+  ).join("\n\n");
+
+  return { charts, content: config.contentRules.includeMarkdownContent ? content : "" };
+}
+
 function buildPrompt(topic: ChosenTopic, research: ResearchData, config: DataVizConfig): string {
   const sections = [
     `Design up to ${config.chartRules.maxCharts} publication-ready charts only if the research contains concrete quantitative evidence.`,
@@ -127,7 +176,7 @@ function buildPrompt(topic: ChosenTopic, research: ResearchData, config: DataViz
   return sections.join("\n\n");
 }
 
-export async function run(topic: ChosenTopic, research?: ResearchData): Promise<DataVizResult> {
+export async function run(topic: ChosenTopic, research?: ProductResearchData | ResearchData): Promise<DataVizResult> {
   console.log("[DataViz] Designing chart blocks...");
 
   let config = DEFAULT_DATAVIZ_CONFIG;
@@ -151,8 +200,16 @@ export async function run(topic: ChosenTopic, research?: ResearchData): Promise<
     research = { papers: [], codeSnippets: [], benchmarks: [], keyFindings: [] };
   }
 
+  if (isProductResearch(research) && research.products.length >= 2) {
+    const productResult = buildProductComparison(topic, research, config);
+    if (productResult.charts.length > 0) {
+      console.log(`[DataViz] Prepared ${productResult.charts.length} product comparison chart(s)`);
+      return productResult;
+    }
+  }
+
   if (countNumericBenchmarks(research) < config.chartRules.minNumericBenchmarks) {
-    console.log("[DataViz] Not enough numeric benchmark data — skipping charts.");
+    console.log("[DataViz] Not enough numeric benchmark/product data — skipping charts.");
     return { charts: [], content: "" };
   }
 

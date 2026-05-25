@@ -15,39 +15,41 @@ import { Textarea } from "@/components/ui/textarea";
 const trendScoutDefaults = {
   sources: {
     serper: true,
-    hackerNews: true,
+    hackerNews: false,
     reddit: true,
-    arxiv: true,
+    arxiv: false,
     fallback: true,
   },
   serper: {
     queries: [
-      "AI model release 2025",
-      "LLM benchmark research 2025",
-      "generative AI news",
-      "machine learning research paper",
+      "best laptop to buy 2026",
+      "best robot vacuum under 300",
+      "best headphones 2026 review",
+      "best air purifier for home",
+      "best fitness tracker 2026",
+      "best standing desk under 500",
     ],
     resultsPerQuery: 8,
-    recency: "qdr:w" as const,
+    recency: "qdr:m" as const,
   },
   hackerNews: {
-    query: "AI LLM machine learning",
+    query: "",
     hoursBack: 48,
     minPoints: 5,
     resultsPerPage: 20,
   },
   reddit: {
-    subreddits: ["MachineLearning", "artificial", "LocalLLaMA", "singularity"],
-    timeframe: "day" as const,
+    subreddits: ["BuyItForLife", "frugalmalefashion", "homeimprovement", "gadgets", "buildapcsales", "VacuumCleaners"],
+    timeframe: "week" as const,
     limitPerSubreddit: 8,
   },
   arxiv: {
-    category: "cs.AI",
-    maxPapers: 10,
+    category: "",
+    maxPapers: 0,
   },
   scoring: {
-    majorModelBonus: 20,
-    launchWordBonus: 15,
+    majorModelBonus: 0,
+    launchWordBonus: 20,
     freshnessBonus: 10,
     duplicatePenalty: 30,
     existingTitleSimilarityThreshold: 0.3,
@@ -158,7 +160,7 @@ export function TrendScoutSettings() {
                 <CardTitle>Trend Scout</CardTitle>
               </div>
               <CardDescription className="mt-2">
-                Discovers candidate AI topics from search, community sources, and research feeds.
+                Discovers buyer-intent product topics from search and community sources.
               </CardDescription>
             </div>
             <div className="flex flex-wrap gap-2">
@@ -196,9 +198,9 @@ export function TrendScoutSettings() {
         </CardHeader>
         <CardContent className="grid gap-3 md:grid-cols-2">
           <SettingSwitch label="Serper / Google" description="Searches Google results through Serper." checked={config.sources.serper} onCheckedChange={(serper) => updateConfig((c) => ({ ...c, sources: { ...c.sources, serper } }))} />
-          <SettingSwitch label="Hacker News" description="Finds recent AI and LLM stories on HN." checked={config.sources.hackerNews} onCheckedChange={(hackerNews) => updateConfig((c) => ({ ...c, sources: { ...c.sources, hackerNews } }))} />
-          <SettingSwitch label="Reddit" description="Reads top posts from configured AI subreddits." checked={config.sources.reddit} onCheckedChange={(reddit) => updateConfig((c) => ({ ...c, sources: { ...c.sources, reddit } }))} />
-          <SettingSwitch label="arXiv" description="Pulls fresh research papers from arXiv RSS." checked={config.sources.arxiv} onCheckedChange={(arxiv) => updateConfig((c) => ({ ...c, sources: { ...c.sources, arxiv } }))} />
+          <SettingSwitch label="Hacker News" description="Optional legacy source; disabled by default for affiliate topics." checked={config.sources.hackerNews} onCheckedChange={(hackerNews) => updateConfig((c) => ({ ...c, sources: { ...c.sources, hackerNews } }))} />
+          <SettingSwitch label="Reddit" description="Reads top posts from configured buying/product subreddits." checked={config.sources.reddit} onCheckedChange={(reddit) => updateConfig((c) => ({ ...c, sources: { ...c.sources, reddit } }))} />
+          <SettingSwitch label="arXiv" description="Optional legacy research feed; disabled by default for affiliate topics." checked={config.sources.arxiv} onCheckedChange={(arxiv) => updateConfig((c) => ({ ...c, sources: { ...c.sources, arxiv } }))} />
           <SettingSwitch label="Evergreen fallback" description="Allows fallback topics when live sources return nothing." checked={config.sources.fallback} onCheckedChange={(fallback) => updateConfig((c) => ({ ...c, sources: { ...c.sources, fallback } }))} />
         </CardContent>
       </Card>
@@ -236,8 +238,8 @@ export function TrendScoutSettings() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">Hacker News</CardTitle>
-            <CardDescription>Controls the HN search query and freshness window.</CardDescription>
+            <CardTitle className="text-xl">Hacker News / legacy source</CardTitle>
+            <CardDescription>Optional source for tech-adjacent product trends. Disabled by default.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
@@ -280,8 +282,8 @@ export function TrendScoutSettings() {
 
         <Card>
           <CardHeader>
-            <CardTitle className="text-xl">arXiv</CardTitle>
-            <CardDescription>Research feed settings. Runtime support for custom categories will be wired next.</CardDescription>
+            <CardTitle className="text-xl">Legacy research feed</CardTitle>
+            <CardDescription>Optional research feed controls. Affiliate discovery normally keeps this disabled.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="grid gap-4 md:grid-cols-2">
@@ -300,8 +302,8 @@ export function TrendScoutSettings() {
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             {([
-              ["majorModelBonus", "Major model bonus"],
-              ["launchWordBonus", "Launch word bonus"],
+              ["majorModelBonus", "Legacy/source bonus"],
+              ["launchWordBonus", "Buying-intent bonus"],
               ["freshnessBonus", "Freshness bonus"],
               ["duplicatePenalty", "Duplicate penalty"],
               ["existingTitleSimilarityThreshold", "Existing-title similarity"],
@@ -324,7 +326,7 @@ export function TrendScoutSettings() {
             <div className="space-y-2"><Label>Max output topics</Label><Input type="number" min={1} value={config.output.maxTopics} onChange={(event) => updateConfig((c) => ({ ...c, output: { ...c.output, maxTopics: numberValue(event.target.value, c.output.maxTopics) } }))} /></div>
             <div className="space-y-2"><Label>Fallback topics</Label><Input type="number" min={1} value={config.output.fallbackTopics} onChange={(event) => updateConfig((c) => ({ ...c, output: { ...c.output, fallbackTopics: numberValue(event.target.value, c.output.fallbackTopics) } }))} /></div>
             <div className="md:col-span-2 rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground">
-              Manual run/test discovery buttons can be added after the runtime reads these Convex settings.
+              These settings now drive PassivePress buyer-intent discovery. Use product/search phrases rather than AI research queries.
             </div>
           </CardContent>
         </Card>
