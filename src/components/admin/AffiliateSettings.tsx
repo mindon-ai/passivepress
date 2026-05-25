@@ -4,6 +4,7 @@ import { api } from "../../../convex/_generated/api";
 import { RotateCcw, Save, ShoppingCart } from "lucide-react";
 import { toast } from "sonner";
 
+import { AffiliateAnalytics } from "@/components/admin/AffiliateAnalytics";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -112,6 +113,8 @@ export function AffiliateSettings() {
           </div>
         </CardContent>
       </Card>
+
+      <AffiliateAnalytics />
     </div>
   );
 }
