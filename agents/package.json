@@ -1,0 +1,46 @@
+{
+  "name": "passivepress-agents",
+  "version": "1.1.0",
+  "type": "module",
+  "scripts": {
+    "run": "tsx pipeline.ts",
+    "dry-run": "tsx pipeline.ts --dry-run",
+    "batch": "tsx pipeline.ts --count 3",
+    "test:trend": "tsx agents/1-trend-scout.ts",
+    "test:picker": "tsx agents/2-topic-picker.ts",
+    "test:image": "tsx agents/3-image-gen.ts",
+    "test:writer": "tsx agents/4-writer.ts",
+    "test:researcher": "tsx agents/3-product-researcher.ts",
+    "test:dataviz": "tsx agents/9-dataviz.ts",
+    "test:convex": "tsx lib/convex-client.ts",
+    "test:skills": "tsx -e \"import { listSkills } from './lib/skill-loader.ts'; console.log('Skills:', listSkills());\"",
+    "meta": "tsx agents/6-meta-agent.ts",
+    "meta:report": "tsx agents/6-meta-agent.ts --report-only",
+    "meta:auto": "tsx agents/6-meta-agent.ts --apply-all",
+    "test:affiliate-linker": "tsx agents/7-affiliate-linker.ts",
+    "mechanic": "tsx agents/7-mechanic.ts",
+    "social": "tsx agents/10-social-media-agent.ts",
+    "social:x:smoke": "tsx scripts/social-x-smoke.ts",
+    "social:x:login": "tsx scripts/social-x-login.ts"
+  },
+  "dependencies": {
+    "sharp": "^0.33.5",
+    "dotenv": "^16.4.5",
+    "uuid": "^9.0.1",
+    "node-fetch": "^3.3.2",
+    "openai": "^6.7.0",
+    "@earendil-works/pi-ai": "latest",
+    "@earendil-works/pi-agent-core": "latest",
+    "@earendil-works/pi-coding-agent": "latest",
+    "playwright": "^1.54.2"
+  },
+  "optionalDependencies": {
+    "@anthropic-ai/sdk": "^0.39.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.2",
+    "typescript": "^5.6.3",
+    "@types/node": "^22.9.0",
+    "@types/uuid": "^9.0.8"
+  }
+}

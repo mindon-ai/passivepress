@@ -1,0 +1,47 @@
+# ─── Git Line Ending Normalization ───────────────────────────────────────────
+# Normalize all text files to LF on commit.
+# `text=auto` lets Git detect text vs binary; `eol=lf` forces LF checkout too.
+
+* text=auto eol=lf
+
+# ─── Source files (explicit, belt-and-suspenders) ─────────────────────────────
+*.ts        text eol=lf
+*.tsx       text eol=lf
+*.js        text eol=lf
+*.jsx       text eol=lf
+*.mjs       text eol=lf
+*.cjs       text eol=lf
+*.json      text eol=lf
+*.jsonc     text eol=lf
+*.css       text eol=lf
+*.html      text eol=lf
+*.md        text eol=lf
+*.mdx       text eol=lf
+*.yaml      text eol=lf
+*.yml       text eol=lf
+*.toml      text eol=lf
+*.env       text eol=lf
+*.env.*     text eol=lf
+*.sh        text eol=lf
+Makefile    text eol=lf
+*.config.ts text eol=lf
+*.config.js text eol=lf
+
+# ─── Binary files (never touch line endings) ──────────────────────────────────
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.webp  binary
+*.avif  binary
+*.svg   binary
+*.ico   binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
+*.otf   binary
+*.eot   binary
+*.pdf   binary
+*.zip   binary
+*.gz    binary
+*.tar   binary

@@ -1,0 +1,177 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,800;9..144,900&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* AI Tools blog — editorial dark theme. All HSL. */
+
+@layer base {
+  :root {
+    --background: 60 9% 96%;
+    --foreground: 20 14% 8%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 20 14% 8%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 20 14% 8%;
+
+    --primary: 20 14% 8%;
+    --primary-foreground: 60 9% 96%;
+
+    --secondary: 60 9% 92%;
+    --secondary-foreground: 20 14% 8%;
+
+    --muted: 60 9% 92%;
+    --muted-foreground: 20 8% 40%;
+
+    --accent: 78 96% 55%;
+    --accent-foreground: 20 14% 8%;
+
+    --highlight: 32 96% 56%;
+    --highlight-foreground: 20 14% 8%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 60 9% 96%;
+
+    --border: 20 8% 88%;
+    --input: 20 8% 88%;
+    --ring: 78 96% 55%;
+
+    --radius: 0.25rem;
+
+    --gradient-hero: radial-gradient(ellipse at top left, hsl(78 96% 55% / 0.15), transparent 50%), radial-gradient(ellipse at bottom right, hsl(32 96% 56% / 0.12), transparent 50%);
+    --shadow-editorial: 0 1px 0 hsl(20 14% 8% / 0.04), 0 8px 24px -12px hsl(20 14% 8% / 0.12);
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 20 14% 6%;
+    --foreground: 60 9% 96%;
+    --card: 20 14% 9%;
+    --card-foreground: 60 9% 96%;
+    --popover: 20 14% 9%;
+    --popover-foreground: 60 9% 96%;
+    --primary: 60 9% 96%;
+    --primary-foreground: 20 14% 8%;
+    --secondary: 20 14% 12%;
+    --secondary-foreground: 60 9% 96%;
+    --muted: 20 14% 12%;
+    --muted-foreground: 60 5% 65%;
+    --accent: 78 96% 55%;
+    --accent-foreground: 20 14% 8%;
+    --highlight: 32 96% 56%;
+    --highlight-foreground: 20 14% 8%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 60 9% 96%;
+    --border: 20 14% 14%;
+    --input: 20 14% 14%;
+    --ring: 78 96% 55%;
+  }
+}
+
+@layer base {
+  * { @apply border-border; }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-feature-settings: 'ss01', 'cv11';
+  }
+  h1, h2, h3, h4, h5, .font-display {
+    font-family: 'Fraunces', Georgia, serif;
+    font-optical-sizing: auto;
+    letter-spacing: -0.02em;
+  }
+  code, pre, .font-mono {
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+}
+
+@layer utilities {
+  .bg-grid {
+    background-image: linear-gradient(hsl(var(--border)) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--border)) 1px, transparent 1px);
+    background-size: 48px 48px;
+  }
+  .bg-grid-fine {
+    background-image:
+      linear-gradient(hsl(var(--foreground) / 0.06) 1px, transparent 1px),
+      linear-gradient(90deg, hsl(var(--foreground) / 0.06) 1px, transparent 1px);
+    background-size: 64px 64px;
+  }
+  .bg-noise {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.35 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/></svg>");
+  }
+  .mask-fade-b {
+    -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+  }
+  .text-balance { text-wrap: balance; }
+  .editorial-prose {
+    @apply prose prose-lg max-w-none
+      prose-headings:font-display prose-headings:text-foreground prose-headings:tracking-tight
+      prose-h2:text-3xl prose-h2:mt-12 prose-h2:mb-4
+      prose-h3:text-2xl prose-h3:mt-8 prose-h3:mb-3
+      prose-p:text-foreground/85 prose-p:leading-relaxed
+      prose-a:text-foreground prose-a:underline prose-a:decoration-accent prose-a:decoration-2 prose-a:underline-offset-4 hover:prose-a:bg-accent/20
+      prose-strong:text-foreground prose-strong:font-semibold
+      prose-blockquote:border-l-4 prose-blockquote:border-accent prose-blockquote:bg-muted/50 prose-blockquote:py-1 prose-blockquote:not-italic
+      prose-img:rounded-md prose-img:shadow-[var(--shadow-editorial)]
+      prose-ul:my-4 prose-ol:my-4
+      prose-li:my-1 prose-li:text-foreground/85 prose-li:marker:text-foreground/40
+      prose-table:border-collapse
+      prose-th:border prose-th:border-border prose-th:bg-muted prose-th:px-4 prose-th:py-2 prose-th:text-left prose-th:font-semibold prose-th:text-sm prose-th:text-foreground
+      prose-td:border prose-td:border-border prose-td:px-4 prose-td:py-2 prose-td:text-sm prose-td:text-foreground/85
+      prose-code:bg-muted prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm prose-code:text-foreground prose-code:before:content-none prose-code:after:content-none
+      prose-pre:bg-transparent prose-pre:border-0 prose-pre:p-0 prose-pre:rounded-none prose-pre:overflow-x-auto
+      prose-pre:prose-code:bg-transparent prose-pre:prose-code:px-0 prose-pre:prose-code:py-0 prose-pre:prose-code:rounded-none prose-pre:prose-code:text-inherit prose-pre:prose-code:text-sm prose-pre:prose-code:font-mono;
+  }
+
+  /* Force list item text to use foreground color — overrides prose accent bleed */
+  .editorial-prose ol li,
+  .editorial-prose ul li {
+    color: hsl(var(--foreground) / 0.85);
+  }
+  .editorial-prose ol li::marker,
+  .editorial-prose ul li::marker {
+    color: hsl(var(--foreground) / 0.4);
+  }
+
+  /* Table dark mode — ensure cells never bleed accent/muted colors */
+  .editorial-prose table {
+    @apply w-full text-sm;
+  }
+  .editorial-prose thead tr {
+    @apply bg-muted;
+  }
+  .editorial-prose thead th {
+    color: hsl(var(--foreground));
+  }
+  .editorial-prose tbody td {
+    color: hsl(var(--foreground) / 0.85);
+  }
+  .editorial-prose tbody tr:nth-child(even) {
+    @apply bg-muted/30;
+  }
+
+  /* Table of Contents — styled as a contained nav block */
+  .editorial-prose .toc-nav,
+  .editorial-prose ul:has(> li > a[href^="#"]) {
+    @apply bg-muted/50 border border-border rounded-sm px-5 py-4 my-8 text-sm;
+  }
+  .editorial-prose ul:has(> li > a[href^="#"]) li {
+    @apply my-0.5 list-none;
+  }
+  .editorial-prose ul:has(> li > a[href^="#"]) a {
+    @apply text-foreground/70 hover:text-foreground no-underline hover:underline decoration-accent underline-offset-4 transition-colors;
+  }
+}

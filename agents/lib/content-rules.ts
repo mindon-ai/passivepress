@@ -1,0 +1,7 @@
+export const MIN_ARTICLE_WORDS = 1100;
+
+export const MIN_META_TITLE_CHARS = 30;
+export const MAX_META_TITLE_CHARS = 60;
+
+export const MIN_META_DESCRIPTION_CHARS = 120;
+export const MAX_META_DESCRIPTION_CHARS = 160;

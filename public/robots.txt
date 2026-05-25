@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://passivepress.qzz.io/sitemap.xml

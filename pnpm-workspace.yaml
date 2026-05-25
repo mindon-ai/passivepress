@@ -1,0 +1,11 @@
+packages:
+  - "agents"
+
+allowBuilds:
+  '@clerk/shared': true
+  '@google/genai': true
+  '@swc/core': true
+  esbuild: true
+  koffi: true
+  protobufjs: true
+  sharp: true

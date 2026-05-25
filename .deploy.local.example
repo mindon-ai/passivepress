@@ -1,0 +1,10 @@
+# Local-only deploy secrets/config for NeuronPress.
+# Copy to .deploy.local and keep it out of git.
+
+# Optional: frontend deploy script will use this automatically for sudo.
+DEPLOY_SUDO_PASS=your-sudo-password
+
+# Optional overrides if you ever need them:
+# CONVEX_SELF_HOSTED_URL=http://localhost:3210
+# CONVEX_SELF_HOSTED_ADMIN_KEY=your-self-hosted-admin-key
+# NVM_DIR=$HOME/.nvm

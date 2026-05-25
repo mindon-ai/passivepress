@@ -1,0 +1,41 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+*.local
+.env
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+node_modules/
+.env
+dist/
+.next/
+logs/
+backup/
+agents/backup/*/
+.deploy.local
+agents/.cache/social/
+
+# Local agent/harness artifacts
+.hermes/
+.meta-analyzer-output.json
+,
+
+# Secret notes
+google-analytics.md

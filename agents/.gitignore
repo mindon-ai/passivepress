@@ -1,0 +1,8 @@
+# Local agent cache, logs and backups
+backup/
+logs/
+.cache/
+dist/
+*.local
+.env
+node_modules/

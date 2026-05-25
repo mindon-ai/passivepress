@@ -1,0 +1,130 @@
+/*
+ * Neuron Press — custom highlight.js theme
+ *
+ * Always renders dark (code blocks look better dark regardless of page theme).
+ * Syntax colors pulled directly from the site's design tokens:
+ *
+ *   Keywords / built-ins  → --accent    lime   hsl(78 96% 55%)
+ *   Strings / attributes  → --highlight amber  hsl(32 96% 56%)
+ *   Comments              → --muted-foreground  warm gray
+ *   Base text             → --foreground        warm off-white
+ *   Background            → slightly lighter than dark --card
+ */
+
+.hljs {
+  display: block;
+  overflow-x: auto;
+  /* Container styling — .hljs owns this, not prose-pre */
+  background: hsl(20 14% 11%);
+  border: 1px solid hsl(20 14% 18%);
+  border-radius: 4px;
+  padding: 1.5rem;
+  /* Typography */
+  color: hsl(60 9% 82%);
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+/* Light mode: soften the code block so it sits naturally on the warm page.
+   A subtle left accent stripe + slightly lighter bg replaces the stark dark box. */
+:root:not(.dark) .hljs {
+  background: hsl(20 12% 13%);
+  border-color: hsl(20 14% 20%);
+  box-shadow:
+    -3px 0 0 0 hsl(78 96% 55%),   /* lime left accent stripe */
+    0 4px 24px -8px hsl(20 14% 6% / 0.35);
+}
+
+/* ── Comments ─────────────────────────────────────────────────────────────── */
+.hljs-comment,
+.hljs-quote {
+  color: hsl(60 5% 48%);
+  font-style: italic;
+}
+
+/* ── Keywords — const, let, if, return, async, await, function, import … ─── */
+/* → accent (lime green) */
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-subst {
+  color: hsl(78 96% 55%);
+  font-weight: 500;
+}
+
+/* ── Strings & template literals ─────────────────────────────────────────── */
+/* → highlight (amber) */
+.hljs-string,
+.hljs-doctag,
+.hljs-template-variable,
+.hljs-addition {
+  color: hsl(32 96% 56%);
+}
+
+/* ── Numbers, booleans, null ──────────────────────────────────────────────── */
+/* Lighter amber — distinct from strings */
+.hljs-number,
+.hljs-literal,
+.hljs-regexp {
+  color: hsl(32 90% 70%);
+}
+
+/* ── Function and class names ─────────────────────────────────────────────── */
+/* Bright foreground — the nouns of the code */
+.hljs-title,
+.hljs-title.class_,
+.hljs-title.function_ {
+  color: hsl(60 9% 96%);
+  font-weight: 500;
+}
+
+/* ── Built-in functions and types ────────────────────────────────────────── */
+/* Muted lime — same family as keywords, lower weight */
+.hljs-built_in,
+.hljs-type {
+  color: hsl(78 70% 72%);
+}
+
+/* ── Object keys, HTML/JSX attributes, CSS properties ───────────────────── */
+.hljs-attr,
+.hljs-attribute,
+.hljs-selector-attr,
+.hljs-selector-pseudo,
+.hljs-selector-class,
+.hljs-selector-id {
+  color: hsl(60 9% 72%);
+}
+
+/* ── Parameters and variables ─────────────────────────────────────────────── */
+.hljs-params,
+.hljs-variable {
+  color: hsl(60 9% 82%);
+}
+
+/* ── Operators and punctuation ───────────────────────────────────────────── */
+.hljs-operator,
+.hljs-punctuation {
+  color: hsl(60 5% 60%);
+}
+
+/* ── HTML / JSX tags ─────────────────────────────────────────────────────── */
+/* Muted amber */
+.hljs-tag,
+.hljs-name {
+  color: hsl(32 70% 65%);
+}
+
+/* ── Meta / preprocessor directives ──────────────────────────────────────── */
+.hljs-meta,
+.hljs-meta .hljs-string {
+  color: hsl(78 50% 65%);
+}
+
+/* ── Diff deletion ───────────────────────────────────────────────────────── */
+.hljs-deletion {
+  color: hsl(0 72% 65%);
+}
+
+/* ── Emphasis and strong within doc comments ─────────────────────────────── */
+.hljs-emphasis { font-style: italic; }
+.hljs-strong   { font-weight: bold; }
