@@ -11,10 +11,17 @@ import { AffiliateCta } from "@/components/AffiliateCta";
 import { AffiliateTable } from "@/components/AffiliateTable";
 import { MarkdownChart, type MarkdownChartSpec } from "@/components/MarkdownChart";
 
+interface AffiliateCtaTokenPayload {
+  asin: string;
+  label: string;
+  href: string;
+}
+
 interface MarkdownRendererProps {
   content: string;
   charts: Record<string, MarkdownChartSpec>;
   ads: Record<string, { slot: string }>;
+  affiliateCtas: Record<string, AffiliateCtaTokenPayload>;
   postSlug?: string;
 }
 
@@ -78,6 +85,7 @@ function CodeBlock({ children }: { children: ReactNode }) {
 function createMarkdownComponents(
   charts: Record<string, MarkdownChartSpec>,
   ads: Record<string, { slot: string }>,
+  affiliateCtas: Record<string, AffiliateCtaTokenPayload>,
   postSlug?: string,
 ): Components {
   return {
@@ -128,6 +136,12 @@ function createMarkdownComponents(
         if (ad) return <AdSlot slot={ad.slot} className="my-8" />;
       }
 
+      const ctaTokenMatch = raw.match(/^@@AFFILIATE_CTA:([^@]+)@@$/);
+      if (ctaTokenMatch) {
+        const cta = affiliateCtas[ctaTokenMatch[1]];
+        if (cta) return <AffiliateCta href={cta.href} asin={cta.asin} postSlug={postSlug}>{cta.label}</AffiliateCta>;
+      }
+
       return <p>{children}</p>;
     },
 
@@ -176,8 +190,8 @@ function createMarkdownComponents(
   };
 }
 
-export default function MarkdownRenderer({ content, charts, ads, postSlug }: MarkdownRendererProps) {
-  const components = createMarkdownComponents(charts, ads, postSlug);
+export default function MarkdownRenderer({ content, charts, ads, affiliateCtas, postSlug }: MarkdownRendererProps) {
+  const components = createMarkdownComponents(charts, ads, affiliateCtas, postSlug);
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}

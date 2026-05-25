@@ -32,6 +32,12 @@ interface AdTokenPayload {
   slot?: string;
 }
 
+interface AffiliateCtaTokenPayload {
+  asin: string;
+  label: string;
+  href: string;
+}
+
 // ---------------------------------------------------------------------------
 // Markdown component helpers
 // ---------------------------------------------------------------------------
@@ -44,11 +50,13 @@ function extractEmbedsFromMarkdown(markdown: string): {
   content: string;
   charts: Record<string, MarkdownChartSpec>;
   ads: Record<string, { slot: string }>;
+  affiliateCtas: Record<string, AffiliateCtaTokenPayload>;
 } {
   const chartRegex = /```chart\s*([\s\S]*?)```/g;
   const adRegex = /```ad\s*([\s\S]*?)```/g;
   const charts: Record<string, MarkdownChartSpec> = {};
   const ads: Record<string, { slot: string }> = {};
+  const affiliateCtas: Record<string, AffiliateCtaTokenPayload> = {};
 
   const withCharts = markdown.replace(chartRegex, (_match, rawPayload: string) => {
     try {
@@ -68,7 +76,7 @@ function extractEmbedsFromMarkdown(markdown: string): {
     return _match;
   });
 
-  const content = withCharts.replace(adRegex, (_match, rawPayload: string) => {
+  const withAds = withCharts.replace(adRegex, (_match, rawPayload: string) => {
     try {
       const parsed = JSON.parse(normalizeChartJson(rawPayload)) as AdTokenPayload;
       const slot = parsed.slot?.trim();
@@ -83,7 +91,25 @@ function extractEmbedsFromMarkdown(markdown: string): {
     return _match;
   });
 
-  return { content, charts, ads };
+  const content = withAds.replace(/@@AFFILIATE_CTA:([A-Z0-9]{10}):([^:@]+):([^@]+)@@/g, (_match, asin: string, encodedLabel: string, encodedHref: string) => {
+    const key = `${asin}-${Object.keys(affiliateCtas).length}`;
+    let label = "Check price on Amazon";
+    let href = `https://www.amazon.com/dp/${asin}`;
+    try {
+      label = decodeURIComponent(encodedLabel);
+    } catch {
+      label = encodedLabel;
+    }
+    try {
+      href = decodeURIComponent(encodedHref);
+    } catch {
+      href = encodedHref;
+    }
+    affiliateCtas[key] = { asin, label, href };
+    return `@@AFFILIATE_CTA:${key}@@`;
+  });
+
+  return { content, charts, ads, affiliateCtas };
 }
 
 const Post = () => {
@@ -95,7 +121,7 @@ const Post = () => {
   const url = typeof window !== "undefined" ? window.location.href : "";
   const featuredImage = normalizeImageUrl(post?.featured_image);
 
-  const { content: contentWithTokens, charts, ads } = useMemo(
+  const { content: contentWithTokens, charts, ads, affiliateCtas } = useMemo(
     () => extractEmbedsFromMarkdown(post?.content || ""),
     [post?.content]
   );
@@ -177,6 +203,7 @@ const Post = () => {
               content={contentWithTokens}
               charts={charts}
               ads={ads}
+              affiliateCtas={affiliateCtas}
               postSlug={post.slug}
             />
           </Suspense>

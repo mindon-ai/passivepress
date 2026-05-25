@@ -84,7 +84,8 @@ export function resolveAffiliatePlaceholders(content: string, products: AmazonPr
     if (type === "BUY_BUTTON") {
       const label = rest.join(":").trim() || "Check price on Amazon";
       affiliateLinks.push(metadataFor(product, asin, "cta", offset));
-      return `[${label}](${product?.affiliateUrl || buildAmazonAffiliateUrl(asin)}){.affiliate-cta data-asin="${asin}"}`;
+      const url = product?.affiliateUrl || buildAmazonAffiliateUrl(asin);
+      return `\n\n@@AFFILIATE_CTA:${asin}:${encodeURIComponent(label)}:${encodeURIComponent(url)}@@\n\n`;
     }
 
     if (type === "PRICE") {

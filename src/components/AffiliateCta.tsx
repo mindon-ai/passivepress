@@ -1,3 +1,5 @@
+import React from "react";
+
 interface AffiliateCtaProps {
   href?: string;
   asin?: string;
@@ -8,7 +10,9 @@ interface AffiliateCtaProps {
 export function AffiliateCta({ href, asin, postSlug, children }: AffiliateCtaProps) {
   const trackClick = () => {
     if (!asin || !postSlug) return;
-    fetch("/api/track-click", {
+    const endpoint = import.meta.env.VITE_CONVEX_SITE_URL || "/api/track-click";
+    const url = endpoint.startsWith("http") ? `${endpoint.replace(/\/$/, "")}/api/track-click` : endpoint;
+    fetch(url, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ asin, postSlug, referrer: document.referrer }),
